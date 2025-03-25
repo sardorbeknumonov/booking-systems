@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  booking-systems:
+    container_name: booking-systems
+    build:
+      context: ./booking-system
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DB_NAME=booking_systems_db
+      - DB_USER=bookkoob
+      - DB_PASSWORD=$!bookkoob!$
+      - DB_HOST=db   # Make sure this matches the db service name below
+      - DB_PORT=5432
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14
+    container_name: booking-systems-db
+    environment:
+      POSTGRES_DB: booking_systems_db
+      POSTGRES_USER: bookkoob
+      POSTGRES_PASSWORD: $!bookkoob!$
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - static_volume:/app/statisfiles
+    depends_on:
+      - booking-systems
+volumes:
+  postgres_data:
+  static_volume:
