@@ -30,14 +30,13 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+    command: postgres -c listen_addresses='*'
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - static_volume:/app/statisfiles
     depends_on:
       - booking-systems
