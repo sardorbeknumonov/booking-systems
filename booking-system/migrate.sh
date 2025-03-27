@@ -10,4 +10,4 @@ python manage.py collectstatic --noinput
 
 # Start the Gunicorn server
 echo "Starting Gunicorn server..."
-gunicorn config.wsgi:application --bind 0.0.0.0:8000
+gunicorn settings.wsgi:application --bind 0.0.0.0:8000

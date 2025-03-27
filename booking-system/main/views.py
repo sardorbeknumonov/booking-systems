@@ -3,6 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import User, Hotel, Room, Booking, RoomType, BookingStatus
@@ -18,6 +19,10 @@ from .serializers import (
 from django.db.models import Q
 from datetime import date
 
+from rest_framework import viewsets
+from .models import TravelPackage
+from .serializers import TravelPackageSerializer
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -27,6 +32,28 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'email', 'phone']
+
+
+class TravelPackageViewSet(viewsets.ModelViewSet):
+    """
+    A simple ViewSet for viewing and editing travel packages.
+    """
+    queryset = TravelPackage.objects.all()
+    serializer_class = TravelPackageSerializer
+
+    @action(detail=False, methods=['get'], url_path='category/(?P<category>[^/]+)')
+    def list_by_category(self, request, category=None):
+        """
+        Custom action to filter travel packages by category.
+        Example: /api/travel-packages/category/Adventure/
+        """
+        queryset = TravelPackage.objects.filter(category=category)
+
+        if not queryset.exists():
+            return Response({"message": "No packages found for this category."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class HotelViewSet(viewsets.ReadOnlyModelViewSet):
