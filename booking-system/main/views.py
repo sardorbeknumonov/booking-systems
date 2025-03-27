@@ -55,6 +55,32 @@ class TravelPackageViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'], url_path='book')
+    def book(self, request, pk=None):
+        """
+                Custom action to book a Travel Package
+                URL: /api/travel-packages/<id>/book/
+                Method: POST
+                """
+        try:
+            travel_package = self.get_object()
+        except TravelPackage.DoesNotExist:
+            return Response({"error": "Travel Package not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Assuming the user provides their name and email for booking
+        name = request.data.get('name')
+        email = request.data.get('email')
+
+        if not name or not email:
+            return Response({"error": "Name and email are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # For simplicity, we just return a success message. You can extend this by saving bookings to a model.
+        return Response({
+            "message": f"Booking for {travel_package.title} confirmed.",
+            "name": name,
+            "email": email
+        }, status=status.HTTP_201_CREATED)
+
 
 class HotelViewSet(viewsets.ReadOnlyModelViewSet):
     """
